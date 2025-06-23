@@ -15,22 +15,21 @@ export class UserService {
   }
 
   async show(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: Number(id) } })
-    if (!user) {
-      throw new NotFoundException('Usuario não existe')
-    }
+    const user = await this.isIdExists(id)
     return user
   }
 
   async update(id: string, body: any) {
-    const user = await this.prisma.user.findUnique({ where: { id: Number(id) } })
-    if (!user) {
-      throw new NotFoundException('Usuario não existe')
-    }
+    await this.isIdExists(id)
     return this.prisma.user.update({ where: { id: Number(id) }, data: body })
   }
 
   async delete(id: string) {
+    await this.isIdExists(id)
+    return this.prisma.user.delete({ where: { id: Number(id) }})
+  }
+
+  private async isIdExists(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id: Number(id) } })
     if (!user) {
       throw new NotFoundException('Usuario não existe')

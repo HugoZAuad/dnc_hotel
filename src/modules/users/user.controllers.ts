@@ -1,3 +1,4 @@
+import { createUserDTO } from './domain/dto/CreateUser.dto'
 import { UserService } from './user.services'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from "@nestjs/common"
 
@@ -16,12 +17,12 @@ export class UserController {
   }
 
   @Post()
-  createUser(@Body() body: any) {
+  createUser(@Body() body: createUserDTO) {
     return this.userService.create(body)
   }
 
   @Patch(':id')
-  updateUser(@Param('id') id: string, @Body() body: any) {
+  updateUser(@Param('id') id: string, @Body() body: createUserDTO) {
     return this.userService.update(id, body)
   }
 
