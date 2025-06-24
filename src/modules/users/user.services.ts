@@ -1,3 +1,4 @@
+
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { PrismaService } from "../prisma/prisma.service"
 import { User } from "generated/prisma/client"
@@ -5,6 +6,7 @@ import { createUserDTO } from "./domain/dto/CreateUser.dto"
 import { updateUserDTO } from "./domain/dto/updateUser.dto"
 import * as bcrypt from "bcrypt"
 import { userSelectFields } from "../prisma/utils/userSelectFields"
+
 
 @Injectable()
 export class UserService {
@@ -36,6 +38,13 @@ export class UserService {
   async delete(id: number) {
     await this.isIdExists(id)
     return this.prisma.user.delete({ where: { id }, select: userSelectFields })
+  }
+
+  async findByEmail(email: string){
+    return await this.prisma.user.findUnique({
+      where: {email},
+      select: userSelectFields
+    })
   }
 
   private async isIdExists(id: number) {
