@@ -22,6 +22,7 @@ model User {
   avatar     String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  Hotel      Hotel[]
 
   @@map("users")
 }
@@ -33,6 +34,8 @@ model Hotel {
   address     String
   image       String?
   price       Float
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
