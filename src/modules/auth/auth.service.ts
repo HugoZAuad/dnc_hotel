@@ -49,7 +49,7 @@ export class AuthService {
     const { valid, decoded } = await this.validateToken(token)
     if (!valid || !decoded) throw new UnauthorizedException('Token invalido')
 
-    const user = await this.userService.update(Number(decoded.sub), { password })
+    const user: User = await this.userService.update(Number(decoded.sub), { password })
     return await this.generateJwtToken(user)
   }
 

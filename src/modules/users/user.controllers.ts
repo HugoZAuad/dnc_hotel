@@ -1,15 +1,18 @@
-import { RoleGuard } from './../../shared/guard/role.guard';
+import { RoleGuard } from './../../shared/guard/role.guard'
 import { AuthGuard } from 'src/shared/guard/auth.guard'
 import { ParamId } from '../../shared/decorators/ParamId.decorator'
 import { createUserDTO } from './domain/dto/CreateUser.dto'
 import { updateUserDTO } from './domain/dto/updateUser.dto'
 import { UserService } from './user.services'
-import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from "@nestjs/common"
+import { Body, Controller, Delete, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common"
 import { User } from 'src/shared/decorators/user.decorator'
 import { Role, User as UserType } from "generated/prisma/client"
 import { Roles } from 'src/shared/decorators/roles.decorator'
 import { UserMatchGuard } from 'src/shared/guard/userMatch.guard'
 import { ThrottlerGuard } from '@nestjs/throttler'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { FileValidationInterceptor } from 'src/shared/interceptors/fileValidation.interceptor'
+import { FileTypeinterceptor } from 'src/shared/interceptors/fileType.interceptor'
 
 @UseGuards(AuthGuard, RoleGuard, ThrottlerGuard)
 @Controller('users')
@@ -44,6 +47,16 @@ export class UserController {
   @Delete(':id')
   deleteUser(@ParamId() id: number) {
     return this.userService.delete(id)
+  }
+
+  @UseInterceptors(FileInterceptor('avatar'), FileValidationInterceptor)
+  @Post('avatar')
+  uploadAvatar(
+    @User('id') id: number,
+    @UploadedFile(FileTypeinterceptor)
+    avatar: Express.Multer.File
+  ) {
+    return this.userService.uploadAvatar(id, avatar.filename)
   }
 
 }
