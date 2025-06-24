@@ -19,9 +19,22 @@ model User {
   email      String   @unique
   password   String
   role       Role     @default(USER)
-  avatar     String?  
+  avatar     String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@map("users")
+}
+
+model Hotel {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  address     String
+  image       String?
+  price       Float
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("hotels")
 }
