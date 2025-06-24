@@ -3,19 +3,20 @@ import { Injectable, UnauthorizedException } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { User } from "generated/prisma/client"
 import { AuthLoginDTO } from "./domain/dto/authLogin.dto"
-import { PrismaService } from "../prisma/prisma.service"
 import * as bcrypt from "bcrypt"
 import { createUserDTO } from '../users/domain/dto/CreateUser.dto'
 import { AuthRegisterDTO } from './domain/dto/authRegister.dto'
 import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto'
 import { ValidateTokenDTO } from './domain/dto/validateToken.dto'
+import { MailerService } from '@nestjs-modules/mailer'
+import { templateHTML } from './domain/utils/templateHtml'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly mailerService: MailerService
   ) { }
 
   async generateJwtToken(user: User, expiresIn: string = '1d') {
@@ -47,7 +48,7 @@ export class AuthService {
   async reset({ token, password }: AuthResetPasswordDTO) {
     const { valid, decoded } = await this.validateToken(token)
     if (!valid || !decoded) throw new UnauthorizedException('Token invalido')
-      
+
     const user = await this.userService.update(Number(decoded.sub), { password })
     return await this.generateJwtToken(user)
   }
@@ -56,8 +57,15 @@ export class AuthService {
     const user = await this.userService.findByEmail(email)
     if (!user) throw new UnauthorizedException('E-mail esta incorreto')
 
-    const token = this.generateJwtToken(user, '30m')
-    return token
+    const token = await this.generateJwtToken(user, '30m')
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Reset Password - DNC Hotel',
+      html: templateHTML(user.name, token.access_token),
+    })
+
+    return `O codigo de verificação foi enviado para o seu ${email}`
   }
 
   async validateToken(token: string): Promise<ValidateTokenDTO> {
