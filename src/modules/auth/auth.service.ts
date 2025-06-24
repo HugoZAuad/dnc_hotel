@@ -1,4 +1,4 @@
-import { UserService } from './../users/user.services';
+import { UserService } from './../users/user.services'
 import { Injectable, UnauthorizedException } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { User } from "generated/prisma/client"
@@ -7,13 +7,14 @@ import { PrismaService } from "../prisma/prisma.service"
 import * as bcrypt from "bcrypt"
 import { createUserDTO } from '../users/domain/dto/CreateUser.dto'
 import { AuthRegisterDTO } from './domain/dto/authRegister.dto'
+import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-    private readonly userService:UserService
+    private readonly userService: UserService
   ) { }
 
   async generateJwtToken(user: User) {
@@ -24,13 +25,13 @@ export class AuthService {
 
   async login({ email, password }: AuthLoginDTO) {
     const user = await this.userService.findByEmail(email)
-    if(!user || await bcrypt.compare(password, user.password)){
+    if (!user || await bcrypt.compare(password, user.password)) {
       throw new UnauthorizedException('E-mail ou password esta incorreto')
     }
     return await this.generateJwtToken(user)
   }
 
-  async register(body: AuthRegisterDTO){
+  async register(body: AuthRegisterDTO) {
     const newUser: createUserDTO = {
       email: body.email,
       name: body.name,
@@ -38,6 +39,13 @@ export class AuthService {
       role: body.role ?? 'USER'
     }
     const user = await this.userService.create(newUser)
+    return await this.generateJwtToken(user)
+  }
+
+  async resetPassword({ token, password }: AuthResetPasswordDTO) {
+    const { valid, decoded } = await this.jwtService.verifyAsync(token)
+    if (!valid) throw new UnauthorizedException('Token invalido') 
+    const user = await this.userService.update(decoded.sub, {password})
     return await this.generateJwtToken(user)
   }
 }
