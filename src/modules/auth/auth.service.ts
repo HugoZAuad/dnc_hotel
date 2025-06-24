@@ -29,6 +29,7 @@ export class AuthService {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('E-mail ou password esta incorreto')
     }
+
     return await this.generateJwtToken(user)
   }
 
@@ -46,6 +47,7 @@ export class AuthService {
   async reset({ token, password }: AuthResetPasswordDTO) {
     const { valid, decoded } = await this.validateToken(token)
     if (!valid || !decoded) throw new UnauthorizedException('Token invalido')
+      
     const user = await this.userService.update(Number(decoded.sub), { password })
     return await this.generateJwtToken(user)
   }
@@ -53,11 +55,12 @@ export class AuthService {
   async forgot(email: string) {
     const user = await this.userService.findByEmail(email)
     if (!user) throw new UnauthorizedException('E-mail esta incorreto')
+
     const token = this.generateJwtToken(user, '30m')
     return token
   }
 
-  private async validateToken(token: string): Promise<ValidateTokenDTO> {
+  async validateToken(token: string): Promise<ValidateTokenDTO> {
     try {
       const decoded = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
@@ -65,9 +68,9 @@ export class AuthService {
         audience: 'users',
       })
       return { valid: true, decoded }
+
     } catch (error) {
       return { valid: false, message: error.message }
     }
-
   }
 }

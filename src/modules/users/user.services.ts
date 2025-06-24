@@ -7,7 +7,6 @@ import { updateUserDTO } from "./domain/dto/updateUser.dto"
 import * as bcrypt from "bcrypt"
 import { userSelectFields } from "../prisma/utils/userSelectFields"
 
-
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) { }
@@ -32,6 +31,7 @@ export class UserService {
     if (body.password) {
       body.password = await this.hashPassword(body.password)
     }
+
     await this.isIdExists(id)
     return this.prisma.user.update({ where: { id }, data: body, select: userSelectFields })
   }
@@ -40,9 +40,9 @@ export class UserService {
     return this.prisma.user.delete({ where: { id }, select: userSelectFields })
   }
 
-  async findByEmail(email: string){
+  async findByEmail(email: string) {
     return await this.prisma.user.findUnique({
-      where: {email},
+      where: { email },
     })
   }
 
@@ -51,6 +51,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('Usuario não existe')
     }
+
     return user
   }
 
