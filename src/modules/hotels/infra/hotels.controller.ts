@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { CreateHotelsService } from '../services/createHotel.service'
 import { FindAllHotelsService } from '../services/findAllHotel.service'
 import { FindOneHotelsService } from '../services/findOneHotel.service'
@@ -15,6 +15,10 @@ import { Roles } from 'src/shared/decorators/roles.decorator'
 import { Role } from 'generated/prisma'
 import { OwnerHotelGuard } from 'src/shared/guard/ownerHotel.guard'
 import { User } from 'src/shared/decorators/user.decorator'
+import { FileTypeinterceptor } from 'src/shared/interceptors/fileType.interceptor'
+import { UploadImageHotelService } from '../services/uploadImageHotel.service'
+import { FileValidationInterceptor } from 'src/shared/interceptors/fileValidation.interceptor'
+import { FileInterceptor } from '@nestjs/platform-express'
 
 @UseGuards(AuthGuard, RoleGuard)
 @Controller('hotels')
@@ -26,7 +30,8 @@ export class HotelsController {
     private readonly deleteHotelsService: DeleteHotelsService,
     private readonly findByOwnerHotel: FindByOwnerHotelService,
     private readonly findByNameHotel: FindByNameHotelService,
-    private readonly updatehotelsService: UpdateHotelsService
+    private readonly updatehotelsService: UpdateHotelsService,
+    private readonly uploadImageHotelService: UploadImageHotelService
   ) { }
 
   @Roles(Role.ADMIN)
@@ -57,6 +62,16 @@ export class HotelsController {
   @Get(':id')
   findOne(@ParamId() id: number) {
     return this.findOnehotelsService.execute(id)
+  }
+
+  @UseInterceptors(FileInterceptor('avatar'), FileValidationInterceptor)
+  @Patch('image/:hotelId')
+  uploadImage(
+    @Param('hotelId') id: string,
+    @UploadedFile(
+          (FileTypeinterceptor)
+    )image: Express.Multer.File) {
+      return this.uploadImageHotelService.execute(id, image.filename)
   }
 
   @UseGuards(OwnerHotelGuard)
