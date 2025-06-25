@@ -1,5 +1,4 @@
-import { Description } from './../../../../../node_modules/mjml-cli/node_modules/jackspeak/dist/commonjs/index.d'
-import { IsDecimal, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator"
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator"
 
 export class CreateHotelDTO {
   @IsString()
@@ -10,13 +9,14 @@ export class CreateHotelDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  Description: string
+  description: string
 
   @IsString()
   @MaxLength(255)
-  image: string
+  @IsOptional()
+  image?: string
 
-  @IsDecimal()
+  @IsNumber()
   @IsNotEmpty()
   price: number
 
@@ -26,6 +26,6 @@ export class CreateHotelDTO {
   address: string
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   ownerId: number
 }
