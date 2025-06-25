@@ -1,4 +1,5 @@
-import { FindOneUserService } from 'src/modules/users/services/findOneUser.service'
+
+import { UserService } from 'src/modules/users/user.services'
 import { AuthService } from './../../modules/auth/auth.service'
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common"
 
@@ -6,7 +7,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly authService: AuthService,
-    private readonly findOneUserService: FindOneUserService
+    private readonly userService: UserService
   ) { }
 
   async canActivate(context: ExecutionContext) {
@@ -18,7 +19,7 @@ export class AuthGuard implements CanActivate {
     const { valid, decoded } = await this.authService.validateToken(token)
     if (!valid) throw new UnauthorizedException('Token invalido')
 
-    const user = await this.findOneUserService.show(Number(decoded.sub))
+    const user = await this.userService.show(Number(decoded.sub))
     if (!user) return false
 
     request.user = user

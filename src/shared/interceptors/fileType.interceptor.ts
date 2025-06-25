@@ -3,13 +3,12 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
-import { Request } from 'express';
 
 @Injectable()
 export class FileTypeinterceptor implements PipeTransform {
   transform(file: Express.Multer.File) {
     const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png'];
-    const allowedMimeSize = [300 * 1024];
+    const allowedMimeSize = [900 * 1024];
 
     if (!file) {
       throw new BadRequestException('Nenhum arquivo enviado.');

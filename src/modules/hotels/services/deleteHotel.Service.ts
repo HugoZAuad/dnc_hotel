@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DeleteHotelsService {
-  delete(id: number) {
+  execute(id: number) {
     return `This action removes a #${id} hotel`;
   }
 }

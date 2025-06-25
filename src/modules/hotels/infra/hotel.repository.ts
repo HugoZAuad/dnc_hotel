@@ -3,6 +3,7 @@ import { CreateHotelDTO } from "../domain/dto/createHotel.dto"
 import { IHotelRepositories } from "../domain/repositories/IHotel.repositories"
 import { PrismaService } from "src/modules/prisma/prisma.service"
 import { Injectable } from "@nestjs/common"
+import { UpdateHotelDTO } from "../domain/dto/updateHotel.dto"
 
 @Injectable()
 export class HotelRepositories implements IHotelRepositories {
@@ -25,8 +26,8 @@ export class HotelRepositories implements IHotelRepositories {
     return this.prisma.hotel.findMany({where: {ownerId}})
   }
 
-  updateHotel(id: number, data: CreateHotelDTO): Promise<Hotel> {
-    throw new Error("Method not implemented.")
+  updateHotel(id: number, data: UpdateHotelDTO): Promise<Hotel> {
+    return this.prisma.hotel.update({where: {id}, data})
   }
   deleteHotel(id: number): Promise<Hotel> {
     throw new Error("Method not implemented.")
