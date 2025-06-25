@@ -21,7 +21,6 @@ export class UserController {
 
   @Get()
   list(@User() user: UserType) {
-    console.log(user)
     return this.userService.list()
   }
 

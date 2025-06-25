@@ -9,7 +9,7 @@ export class UpdateHotelsService {
           @Inject(HOTEL_REPOSITORIES_TOKEN)
           private readonly hotelRepositories: IHotelRepositories) { }
   async execute(id: number, updateHotelDto: UpdateHotelDTO) {
-    return await this.hotelRepositories.updateHotel(id, updateHotelDto)
+    return await this.hotelRepositories.updateHotel(Number(id), updateHotelDto)
   }
 
 }

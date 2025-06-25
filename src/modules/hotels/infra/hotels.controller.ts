@@ -14,6 +14,7 @@ import { RoleGuard } from 'src/shared/guard/role.guard'
 import { Roles } from 'src/shared/decorators/roles.decorator'
 import { Role } from 'generated/prisma'
 import { OwnerHotelGuard } from 'src/shared/guard/ownerHotel.guard'
+import { User } from 'src/shared/decorators/user.decorator'
 
 @UseGuards(AuthGuard, RoleGuard)
 @Controller('hotels')
@@ -30,24 +31,24 @@ export class HotelsController {
 
   @Roles(Role.ADMIN)
   @Post()
-  create(@Body() createHotelDto: CreateHotelDTO) {
-    return this.createhotelsService.execute(createHotelDto)
+  create(@User('id') id: number, @Body() createHotelDto: CreateHotelDTO) {
+    return this.createhotelsService.execute(createHotelDto, id)
   }
 
   @Roles(Role.ADMIN, Role.USER)
   @Get()
-  findAll() {
-    return this.findAllhotelsService.execute()
+  findAll(@Query('page') page: string = '1', @Query('limit') limit: string = '10') {
+    return this.findAllhotelsService.execute(Number(page), Number(limit))
   }
 
   @Roles(Role.ADMIN)
-  @Get(':ownerId')
-  findOwner(@ParamId() id: number) {
+  @Get('owner')
+  findOwner(@User('id') id: number) {
     return this.findByOwnerHotel.execute(id)
   }
 
   @Roles(Role.ADMIN, Role.USER)
-  @Get(':name')
+  @Get('name')
   FindName(@Query('name') name: string) {
     return this.findByNameHotel.execute(name)
   }
