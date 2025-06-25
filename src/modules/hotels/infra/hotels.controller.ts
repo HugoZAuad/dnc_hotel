@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CreateHotelsService } from '../services/createHotel.service'
 import { FindAllHotelsService } from '../services/findAllHotel.service'
 import { FindOneHotelsService } from '../services/findOneHotel.service'
-import { DeleteHotelsService } from '../services/deleteHotel.Service'
+import { DeleteHotelsService } from '../services/deleteHotel.service'
 import { UpdateHotelsService } from '../services/updateHotel.service'
 import { CreateHotelDTO } from '../domain/dto/createHotel.dto'
 import { UpdateHotelDTO } from '../domain/dto/updateHotel.dto'

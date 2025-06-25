@@ -1,4 +1,6 @@
-import { UserService } from './../users/user.services'
+import { CreateUserService } from 'src/modules/users/services/createUser.service'
+import { FindOneUserService } from 'src/modules/users/services/findOneUser.service'
+import { UpdateUserService } from 'src/modules/users/services/updateUser.service'
 import { Injectable, UnauthorizedException } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { User } from "generated/prisma/client"
@@ -15,7 +17,9 @@ import { templateHTML } from './domain/utils/templateHtml'
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    private readonly createUserService: CreateUserService,
+    private readonly findOneUserService: FindOneUserService,
+    private readonly updateUserService: UpdateUserService,
     private readonly mailerService: MailerService
   ) { }
 
@@ -26,7 +30,9 @@ export class AuthService {
   }
 
   async login({ email, password }: AuthLoginDTO) {
-    const user = await this.userService.findByEmail(email)
+    // Using findOneUserService to find user by email
+    const users = await this.findOneUserService.findByEmail(email)
+    const user = users ? users : null
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('E-mail ou password esta incorreto')
     }
@@ -41,7 +47,7 @@ export class AuthService {
       password: body.password,
       role: body.role ?? 'USER'
     }
-    const user = await this.userService.create(newUser)
+    const user = await this.createUserService.create(newUser)
     return await this.generateJwtToken(user)
   }
 
@@ -49,12 +55,14 @@ export class AuthService {
     const { valid, decoded } = await this.validateToken(token)
     if (!valid || !decoded) throw new UnauthorizedException('Token invalido')
 
-    const user: User = await this.userService.update(Number(decoded.sub), { password })
+    const user: User = await this.updateUserService.update(Number(decoded.sub), { password })
     return await this.generateJwtToken(user)
   }
 
   async forgot(email: string) {
-    const user = await this.userService.findByEmail(email)
+    // Using findOneUserService to find user by email
+    const users = await this.findOneUserService.findByEmail(email)
+    const user = users ? users : null
     if (!user) throw new UnauthorizedException('E-mail esta incorreto')
 
     const token = await this.generateJwtToken(user, '30m')
