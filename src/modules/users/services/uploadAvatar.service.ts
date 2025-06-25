@@ -1,17 +1,17 @@
-import { Injectable } from "@nestjs/common"
-import { PrismaService } from "../../prisma/prisma.service"
+import { Injectable, Inject } from "@nestjs/common"
 import { join, resolve } from "path"
 import { stat, unlink } from "fs/promises"
 import { IsIdExistsUtil } from "../utils/isIdExists.utils"
 import { updateUserDTO } from "../domain/dto/updateUser.dto"
-import { UpdateUserService } from "./updateUser.service"
+import { USER_REPOSITORIES_TOKEN } from "../utils/repositoriesUsers.Tokens"
+import { IUserRepositories } from "../domain/repositories/IUser.repositories"
 
 @Injectable()
 export class UploadAvatarService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly isIdExistsUtil: IsIdExistsUtil,
-    private readonly updateUserService: UpdateUserService
+    @Inject(USER_REPOSITORIES_TOKEN)
+    private readonly userRepositories: IUserRepositories
   ) {}
 
   async uploadAvatar(id: number, avatarFilename: string) {
@@ -24,7 +24,7 @@ export class UploadAvatarService {
         await unlink(userAvatarFilePath)
       }
     }
-    const userUpdated = await this.updateUserService.update(id, { avatar: avatarFilename } as updateUserDTO)
+    const userUpdated = await this.userRepositories.uploadAvatar(id, { avatar: avatarFilename })
     return userUpdated
   }
 }

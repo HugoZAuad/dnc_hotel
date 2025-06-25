@@ -1,17 +1,18 @@
-import { Injectable } from "@nestjs/common"
-import { PrismaService } from "../../prisma/prisma.service"
-import { userSelectFields } from "../../prisma/utils/userSelectFields"
+import { Injectable, Inject } from "@nestjs/common"
 import { IsIdExistsUtil } from "../utils/isIdExists.utils"
+import { USER_REPOSITORIES_TOKEN } from "../utils/repositoriesUsers.Tokens"
+import { IUserRepositories } from "../domain/repositories/IUser.repositories"
 
 @Injectable()
 export class DeleteUserService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(USER_REPOSITORIES_TOKEN)
+    private readonly userRepositories: IUserRepositories,
     private readonly isIdExistsUtil: IsIdExistsUtil
   ) {}
 
   async delete(id: number) {
     await this.isIdExistsUtil.isIdExists(id)
-    return this.prisma.user.delete({ where: { id }, select: userSelectFields })
+    return this.userRepositories.deleteUser(id)
   }
 }

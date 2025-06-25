@@ -2,7 +2,8 @@ import { Injectable } from "@nestjs/common"
 import { PrismaService } from "../../prisma/prisma.service"
 import { User } from "generated/prisma/client"
 import { createUserDTO } from "../domain/dto/createUser.dto"
-import { IHotelRepositories as IUserRepositories } from "../domain/repositories/IUser.repositories"
+import { updateUserDTO } from "../domain/dto/updateUser.dto"
+import { IUserRepositories } from "../domain/repositories/IUser.repositories"
 
 @Injectable()
 export class UserRepositories implements IUserRepositories {
@@ -24,11 +25,20 @@ export class UserRepositories implements IUserRepositories {
     return await this.prisma.user.findMany()
   }
 
-  async updateUser(id: number, data: createUserDTO): Promise<User> {
+  async updateUser(id: number, data: updateUserDTO): Promise<User> {
     return await this.prisma.user.update({ where: { id }, data })
   }
 
   async deleteUser(id: number): Promise<User> {
     return await this.prisma.user.delete({ where: { id } })
+  }
+
+  async uploadAvatar(id: number, data: updateUserDTO): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        avatar: data.avatar
+      }
+    })
   }
 }

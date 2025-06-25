@@ -1,12 +1,15 @@
-import { Injectable } from "@nestjs/common"
-import { PrismaService } from "../../prisma/prisma.service"
-import { userSelectFields } from "../../prisma/utils/userSelectFields"
+import { Injectable, Inject } from "@nestjs/common"
+import { USER_REPOSITORIES_TOKEN } from "../utils/repositoriesUsers.Tokens"
+import { IUserRepositories } from "../domain/repositories/IUser.repositories"
 
 @Injectable()
 export class FindAllUserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(USER_REPOSITORIES_TOKEN)
+    private readonly userRepositories: IUserRepositories
+  ) {}
 
   async list() {
-    return await this.prisma.user.findMany({ select: userSelectFields })
+    return await this.userRepositories.findUsers()
   }
 }
