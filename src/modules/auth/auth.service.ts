@@ -1,4 +1,3 @@
-
 import { Injectable, UnauthorizedException } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import { User } from "generated/prisma/client"
@@ -10,13 +9,17 @@ import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto'
 import { ValidateTokenDTO } from './domain/dto/validateToken.dto'
 import { MailerService } from '@nestjs-modules/mailer'
 import { templateHTML } from './domain/utils/templateHtml'
-import { UserService } from "../users/user.services"
+import { CreateUserService } from "../users/services/createUser.service"
+import { FindUserByEmailService } from "../users/services/findUserByEmail.service"
+import { UpdateUserService } from "../users/services/updateUser.service"
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,   
+    private readonly createUserService: CreateUserService,
+    private readonly findUserByEmailService: FindUserByEmailService,
+    private readonly updateUserService: UpdateUserService,
     private readonly mailerService: MailerService
   ) { }
 
@@ -27,10 +30,9 @@ export class AuthService {
   }
 
   async login({ email, password }: AuthLoginDTO) {
-    const users = await this.userService.findByEmail(email)
-    const user = users ? users : null
+    const user = await this.findUserByEmailService.findByEmail(email)
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('E-mail ou password esta incorreto')
+      throw new UnauthorizedException('E-mail ou password está incorreto')
     }
 
     return await this.generateJwtToken(user)
@@ -43,22 +45,21 @@ export class AuthService {
       password: body.password,
       role: body.role ?? 'USER'
     }
-    const user = await this.userService.create(newUser)
+    const user = await this.createUserService.execute(newUser)
     return await this.generateJwtToken(user)
   }
 
   async reset({ token, password }: AuthResetPasswordDTO) {
     const { valid, decoded } = await this.validateToken(token)
-    if (!valid || !decoded) throw new UnauthorizedException('Token invalido')
+    if (!valid || !decoded) throw new UnauthorizedException('Token inválido')
 
-    const user: User = await this.userService.update(Number(decoded.sub), { password })
+    const user: User = await this.updateUserService.execute(Number(decoded.sub), { password })
     return await this.generateJwtToken(user)
   }
 
   async forgot(email: string) {
-    const users = await this.userService.findByEmail(email)
-    const user = users ? users : null
-    if (!user) throw new UnauthorizedException('E-mail esta incorreto')
+    const user = await this.findUserByEmailService.findByEmail(email)
+    if (!user) throw new UnauthorizedException('E-mail está incorreto')
 
     const token = await this.generateJwtToken(user, '30m')
 
@@ -68,7 +69,7 @@ export class AuthService {
       html: templateHTML(user.name, token.access_token),
     })
 
-    return `O codigo de verificação foi enviado para o seu ${email}`
+    return `O código de verificação foi enviado para o seu ${email}`
   }
 
   async validateToken(token: string): Promise<ValidateTokenDTO> {

@@ -1,9 +1,10 @@
+import { FindUserByIdService } from './../../users/services/findUserById.service';
 import { Inject, Injectable } from "@nestjs/common"
 import { RESERVATION_REPOSITORIES_TOKEN } from "../utils/repositoriesReservation.Tokens"
 import { ReservationRepositories } from "../infra/reservations.repositories"
 import { ReservationStatus } from "generated/prisma"
 import { MailerService } from "@nestjs-modules/mailer"
-import { UserService } from "src/modules/users/user.services"
+
 
 @Injectable()
 export class UpdateStatusReservationService {
@@ -11,8 +12,7 @@ export class UpdateStatusReservationService {
     @Inject(RESERVATION_REPOSITORIES_TOKEN)
     private readonly reservationRepositories: ReservationRepositories,
     private readonly mailerService: MailerService,
-    private readonly userService: UserService
-
+    private readonly findUserByIdService: FindUserByIdService
   ) { }
 
   async execute(id: number, status: ReservationStatus) {
@@ -20,7 +20,7 @@ export class UpdateStatusReservationService {
       id,
       status
     )
-    const user = await this.userService.show(reservation.userId)
+    const user = await this.findUserByIdService.show(reservation.userId)
     await this.mailerService.sendMail({
       to: user.email,
       subject: "A sua reserva teve o status atualizado",

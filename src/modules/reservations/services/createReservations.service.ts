@@ -7,7 +7,7 @@ import { HotelRepositories } from 'src/modules/hotels/infra/hotels.repository'
 import { ReservationStatus } from 'generated/prisma/client'
 import { HOTEL_REPOSITORIES_TOKEN } from 'src/modules/hotels/utils/repositoriesHotel.Tokens'
 import { MailerService } from '@nestjs-modules/mailer'
-import { UserService } from 'src/modules/users/user.services'
+import { FindUserByIdService } from 'src/modules/users/services/findUserById.service'
 
 @Injectable()
 export class CreateReservationsService {
@@ -17,7 +17,7 @@ export class CreateReservationsService {
     @Inject(HOTEL_REPOSITORIES_TOKEN)
     private readonly hotelRespositories: HotelRepositories,
     private readonly mailerService: MailerService,
-    private readonly userService: UserService
+    private readonly findUserByIdService: FindUserByIdService
   ) { }
   async create(id: number, data: CreateReservationDto) {
     const checkInDate = parseISO(data.checkIn)
@@ -46,7 +46,7 @@ export class CreateReservationsService {
       status: ReservationStatus.PENDING
     }
 
-    const hotelOwner = await this.userService.show(hotel.ownerId)
+    const hotelOwner = await this.findUserByIdService.show(hotel.ownerId)
 
     await this.mailerService.sendMail({
       to: hotelOwner.email,
