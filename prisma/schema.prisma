@@ -13,31 +13,55 @@ enum Role {
   USER
 }
 
+enum ReservationStatus {
+  PENDING
+  APROVED
+  CANCELED
+}
+
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
-  role       Role     @default(USER)
-  avatar     String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  Hotel      Hotel[]
+  id          Int           @id @default(autoincrement())
+  name        String
+  email       String        @unique
+  password    String
+  role        Role          @default(USER)
+  avatar      String?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  hotel       Hotel[]
+  reservation Reservation[]
 
   @@map("users")
 }
 
 model Hotel {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
   description String
   address     String
   image       String?
   price       Float
   ownerId     Int
-  owner       User     @relation(fields: [ownerId], references: [id])
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  owner       User          @relation(fields: [ownerId], references: [id])
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  reservation Reservation[]
 
   @@map("hotels")
+}
+
+model Reservation {
+  id         Int               @id @default(autoincrement())
+  userId     Int
+  user       User              @relation(fields: [userId], references: [id])
+  hotelId    Int
+  hotel      Hotel             @relation(fields: [hotelId], references: [id])
+  checkIn    DateTime
+  checkOut   DateTime
+  total      Float
+  status     ReservationStatus @default(PENDING)
+  created_at DateTime          @default(now())
+  updated_at DateTime          @updatedAt
+
+  @@map("reservation")
 }
