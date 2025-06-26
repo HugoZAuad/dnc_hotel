@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { HOTEL_REPOSITORIES_TOKEN } from '../utils/repositoriesHotel.Tokens'
 import { IHotelRepositories } from '../domain/repositories/IHotel.repositories'
-import { userSelectFields } from 'src/modules/prisma/utils/userSelectFields'
 
 
 @Injectable()

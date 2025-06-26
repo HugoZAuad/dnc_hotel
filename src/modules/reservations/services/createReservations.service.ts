@@ -5,28 +5,30 @@ import { ReservationRepositories } from '../infra/reservations.repositories'
 import { differenceInDays, parseISO } from 'date-fns'
 import { HotelRepositories } from 'src/modules/hotels/infra/hotels.repository'
 import { Reservation, ReservationStatus } from 'generated/prisma/client'
+import { HOTEL_REPOSITORIES_TOKEN } from 'src/modules/hotels/utils/repositoriesHotel.Tokens'
 
 @Injectable()
 export class CreateReservationsService {
   constructor(
     @Inject(RESERVATION_REPOSITORIES_TOKEN)
-    private readonly reservationsRepositories: ReservationRepositories,
+    private readonly ReservationsRepositories: ReservationRepositories,
+    @Inject(HOTEL_REPOSITORIES_TOKEN)
     private readonly hotelRespositories: HotelRepositories,
   ) { }
   async create(id: number, data: CreateReservationDto) {
     const checkInDate = parseISO(data.checkIn)
     const checkOutDate = parseISO(data.checkOut)
     const daysOffStay = differenceInDays(checkInDate, checkOutDate)
-    if(checkInDate >= checkOutDate){
+    if (checkInDate >= checkOutDate) {
       throw new BadRequestException('A data de Check-out deve ser depois da data de Check-in')
     }
 
     const hotel = await this.hotelRespositories.findHotelById(data.hotelId)
-    if(!hotel){
+    if (!hotel) {
       throw new NotFoundException('Hotel não encontrado')
     }
 
-    if(typeof hotel.price !== 'number' || hotel.price <= 0){
+    if (typeof hotel.price !== 'number' || hotel.price <= 0) {
       throw new BadRequestException('Preço do hotel invalido')
     }
 
@@ -40,6 +42,6 @@ export class CreateReservationsService {
       status: ReservationStatus.PENDING
     }
 
-    return this.reservationsRepositories.create(newReservation)
+    return this.ReservationsRepositories.create(newReservation)
   }
 }

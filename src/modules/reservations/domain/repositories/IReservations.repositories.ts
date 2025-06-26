@@ -3,6 +3,8 @@ import { CreateReservationDto } from "../dto/create-reservation.dto"
 
 export interface IReservationRepositories {
   create(data: CreateReservationDto): Promise<Reservation>
-  //findById(id: number): Promise<Reservation>
+  findById(id: number): Promise<Reservation>
+  findAll(): Promise<Reservation[]>
+  findByUser(userId: number): Promise<Reservation[]>
 
 }
