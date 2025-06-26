@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Delete, UseGuards, Query } from '@nestjs/common'
 import { ReservationRepositories } from './reservations.repositories'
 import { AuthGuard } from 'src/shared/guard/auth.guard'
 import { User } from 'src/shared/decorators/user.decorator'
@@ -23,8 +23,8 @@ export class ReservationsController {
   }
 
   @Get()
-  findAll() {
-    return this.findAllReservationsService.execute()
+  findAll(@Query('page') page: string = '1', @Query('limit') limit: string = '10') {
+    return this.findAllReservationsService.execute(Number(page), Number(limit))
   }
   
   @Get('user')

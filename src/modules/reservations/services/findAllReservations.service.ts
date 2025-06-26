@@ -10,7 +10,16 @@ export class FindAllReservationsService {
 
   ) { }
 
-  async execute(){
-    return await this.ReservationsRepositories.findAll()
+  async execute(page: number = 1, limit: number = 10) {
+    const offSet = (page - 1) * limit
+    const data = await this.ReservationsRepositories.findAll(offSet, limit)
+    const total = await this.ReservationsRepositories.countReservations()
+
+    return {
+      total,
+      page,
+      per_page: limit,
+      data
+    }
   }
 }

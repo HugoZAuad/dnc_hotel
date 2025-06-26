@@ -69,9 +69,9 @@ export class HotelsController {
   uploadImage(
     @Param('hotelId') id: string,
     @UploadedFile(
-          (FileTypeinterceptor)
-    )image: Express.Multer.File) {
-      return this.uploadImageHotelService.execute(id, image.filename)
+      (FileTypeinterceptor)
+    ) image: Express.Multer.File) {
+    return this.uploadImageHotelService.execute(id, image.filename)
   }
 
   @UseGuards(OwnerHotelGuard)

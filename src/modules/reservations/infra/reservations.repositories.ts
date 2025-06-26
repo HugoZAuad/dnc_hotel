@@ -14,11 +14,18 @@ export class ReservationRepositories implements IReservationRepositories {
   findById(id: number): Promise<Reservation> {
     return this.prisma.reservation.findUnique({ where: { id } })
   }
-  findAll(): Promise<Reservation[]> {
-    return this.prisma.reservation.findMany()
+  findAll(offSet: number, limit: number): Promise<Reservation[]> {
+    return this.prisma.reservation.findMany({
+      take: limit,
+      skip: offSet,
+    })
   }
   findByUser(userId: number): Promise<Reservation[]> {
     return this.prisma.reservation.findMany({ where: { userId } })
+  }
+
+    countReservations(): Promise<number> {
+    return this.prisma.hotel.count()
   }
 
 }
