@@ -1,0 +1,1 @@
+export const REDIS_HOTEL_KEY = 'find_all_hotels'

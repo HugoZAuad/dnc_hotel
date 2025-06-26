@@ -1,13 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { IHotelRepositories } from '../domain/repositories/IHotel.repositories'
 import { HOTEL_REPOSITORIES_TOKEN } from '../utils/repositoriesHotel.Tokens'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { REDIS_HOTEL_KEY } from '../utils/redisKey'
 
 @Injectable()
 export class DeleteHotelsService {
   constructor(
     @Inject(HOTEL_REPOSITORIES_TOKEN)
-    private readonly hotelRepositories: IHotelRepositories) { }
-  execute(id: number) {
-    return this.hotelRepositories.deleteHotel(id)
+    private readonly hotelRepositories: IHotelRepositories,
+    @InjectRedis() private readonly redis: Redis
+  ) { }
+  async execute(id: number) {
+    await this.redis.del(REDIS_HOTEL_KEY)
+    return await this.hotelRepositories.deleteHotel(id)
   }
 }

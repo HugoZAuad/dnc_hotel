@@ -4,12 +4,16 @@ import { USER_REPOSITORIES_TOKEN } from '../utils/repositoriesUser.Tokens'
 import { join, resolve } from 'path'
 import { stat, unlink } from 'fs/promises'
 import { isIdExists } from '../../prisma/utils/userUtils'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { REDIS_USERS_KEY } from '../utils/redisKey'
 
 @Injectable()
 export class UploadAvatarUserService {
   constructor(
     @Inject(USER_REPOSITORIES_TOKEN)
-    private readonly userRepositories: IUserRepositories
+    private readonly userRepositories: IUserRepositories,
+    @InjectRedis() private readonly redis: Redis
   ) {}
 
   async execute(id: number, avatarFilename: string) {
@@ -22,6 +26,7 @@ export class UploadAvatarUserService {
         await unlink(userAvatarFilePath)
       }
     }
+    await this.redis.del(REDIS_USERS_KEY)
     return this.userRepositories.update(id, { avatar: avatarFilename })
   }
 }

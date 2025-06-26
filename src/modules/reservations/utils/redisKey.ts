@@ -1,0 +1,1 @@
+export const REDIS_RESERVATIONS_KEY = 'find_all_reservation'

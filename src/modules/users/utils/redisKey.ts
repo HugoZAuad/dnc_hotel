@@ -1,0 +1,1 @@
+export const REDIS_USERS_KEY = 'find_all_users'

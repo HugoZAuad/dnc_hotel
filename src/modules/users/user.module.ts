@@ -3,7 +3,6 @@ import { UserController } from "./infra/user.controllers"
 import { CreateUserService } from "./services/createUser.service"
 import { UpdateUserService } from "./services/updateUser.service"
 import { DeleteUserService } from "./services/deleteUser.service"
-import { FindUserService } from "./services/findUser.service"
 import { UploadAvatarUserService } from "./services/uploadAvatarUser.service"
 import { UserRepositories } from "./infra/user.repositories"
 import { USER_REPOSITORIES_TOKEN } from "./utils/repositoriesUser.Tokens"
@@ -35,7 +34,6 @@ import { FindUserByIdService } from "./services/findUserById.service"
     CreateUserService,
     UpdateUserService,
     DeleteUserService,
-    FindUserService,
     FindAllUserService,
     FindUserByEmailService,
     FindUserByIdService,
@@ -49,7 +47,6 @@ import { FindUserByIdService } from "./services/findUserById.service"
     CreateUserService,
     UpdateUserService,
     DeleteUserService,
-    FindUserService,
     UploadAvatarUserService,
     FindUserByEmailService,
     FindUserByIdService
