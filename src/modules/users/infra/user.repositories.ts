@@ -1,3 +1,4 @@
+import { userSelectFields } from './../../prisma/utils/userSelectFields'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import { IUserRepositories } from '../domain/repositories/IUser.repositories'
@@ -7,9 +8,9 @@ import { User } from 'generated/prisma/client'
 
 @Injectable()
 export class UserRepositories implements IUserRepositories {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
-  async findAll(): Promise<User[]> {
+  async findAll(offSet: number, limit: number, select: object = userSelectFields): Promise<User[]> {
     return this.prisma.user.findMany()
   }
 
@@ -31,5 +32,9 @@ export class UserRepositories implements IUserRepositories {
 
   async delete(id: number): Promise<User> {
     return this.prisma.user.delete({ where: { id } })
+  }
+
+  countUsers(): Promise<number> {
+    return this.prisma.user.count()
   }
 }
