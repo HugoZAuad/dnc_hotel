@@ -29,7 +29,7 @@ export class UserController {
     return this.userService.show(id)
   }
 
-  @Roles(Role.ADMIN)
+  
   @Post()
   createUser(@Body() body: createUserDTO) {
     return this.userService.create(body)

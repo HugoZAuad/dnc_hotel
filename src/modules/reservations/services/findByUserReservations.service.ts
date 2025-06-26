@@ -6,11 +6,11 @@ import { ReservationRepositories } from "../infra/reservations.repositories"
 export class FindByUserReservationsService {
   constructor(
     @Inject(RESERVATION_REPOSITORIES_TOKEN)
-    private readonly eservationRepositories: ReservationRepositories,
+    private readonly reservationRepositories: ReservationRepositories,
 
   ) { }
 
   async execute(id: number){
-    return await this.eservationRepositories.findByUser(id)
+    return await this.reservationRepositories.findByUser(id)
   }
 }
