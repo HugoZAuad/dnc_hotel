@@ -34,7 +34,7 @@ export class UserController {
 
   @Get()
   list(@User() user: UserType) {
-    return this.findAllUsersService.findAll()
+    return this.findAllUsersService.execute()
   }
 
   @Get(':id')
