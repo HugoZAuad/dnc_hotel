@@ -1,25 +1,26 @@
-import { Test, TestingModule } from "@nestjs/testing"
-import { HOTEL_REPOSITORIES_TOKEN } from "../utils/repositoriesHotel.Tokens"
-import { CreateHotelsService } from "./createHotel.service"
-import { IHotelRepositories } from "../domain/repositories/IHotel.repositories"
+import { Test, TestingModule } from '@nestjs/testing';
+import { HOTEL_REPOSITORIES_TOKEN } from '../utils/repositoriesHotel.Tokens';
+import { CreateHotelsService } from './createHotel.service';
+import { IHotelRepositories } from '../domain/repositories/IHotel.repositories';
+import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 
-let service: CreateHotelsService
-let hotelRepositories: IHotelRepositories
-let redis: { del: jest.Mock }
+let service: CreateHotelsService;
+let hotelRepositories: IHotelRepositories;
+let redis: { del: jest.Mock };
 
 const createHotelMock = {
   id: 1,
-  name: "Hotel test",
-  description: "Um hotel para teste",
-  image: "imagem-test.png",
+  name: 'Hotel test',
+  description: 'Um hotel para teste',
+  image: 'imagem-test.png',
   price: 100,
-  address: "rua 1 da casa x",
+  address: 'rua 1 da casa x',
   ownerId: 1,
   created_at: new Date(),
-  updated_at: new Date()
-}
+  updated_at: new Date(),
+};
 
-const userIdMock = 1
+const userIdMock = 1;
 
 describe('CreateHotelService', () => {
   beforeEach(async () => {
@@ -29,7 +30,7 @@ describe('CreateHotelService', () => {
         {
           provide: HOTEL_REPOSITORIES_TOKEN,
           useValue: {
-            createHotel: jest.fn()
+            createHotel: jest.fn().mockResolvedValue(createHotelMock),
           },
         },
         {
@@ -39,19 +40,31 @@ describe('CreateHotelService', () => {
           },
         },
       ],
-    }).compile()
-    service = module.get<CreateHotelsService>(CreateHotelsService)
-    hotelRepositories = module.get<IHotelRepositories>(HOTEL_REPOSITORIES_TOKEN)
-    redis = module.get('default_IORedisModuleConnectionToken')
-  })
+    }).compile();
+    service = module.get<CreateHotelsService>(CreateHotelsService);
+    hotelRepositories = module.get<IHotelRepositories>(
+      HOTEL_REPOSITORIES_TOKEN,
+    );
+    redis = module.get('default_IORedisModuleConnectionToken');
+  });
 
   it('Deve ser definido', () => {
-    expect(service).toBeDefined()
-  })
+    expect(service).toBeDefined();
+  });
 
-  it('Deve deletar o redis key', () => {
-    const redisDelSpy = jest.spyOn(redis, 'del').mockResolvedValue(1)
-    await service.execute(createHotelMock)
-    expect(service).toBeDefined()
-  })
-})
+  it('Deve deletar o redis key', async () => {
+    const redisDelSpy = jest.spyOn(redis, 'del').mockResolvedValue(1);
+    await service.execute(createHotelMock, userIdMock);
+    expect(redisDelSpy).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+  });
+
+  it('Deve criar um hotel', async () => {
+    const result = await service.execute(createHotelMock, userIdMock);
+    await service.execute(createHotelMock, userIdMock);
+    expect(hotelRepositories.createHotel).toHaveBeenCalledWith(
+      createHotelMock,
+      userIdMock,
+    );
+    expect(result).toEqual(createHotelMock);
+  });
+});
