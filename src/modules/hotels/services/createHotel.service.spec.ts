@@ -52,19 +52,21 @@ describe('CreateHotelService', () => {
     expect(service).toBeDefined();
   });
 
-  it('Deve deletar o redis key', async () => {
-    const redisDelSpy = jest.spyOn(redis, 'del').mockResolvedValue(1);
-    await service.execute(createHotelMock, userIdMock);
-    expect(redisDelSpy).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
-  });
+  describe('execute', () => {
+    it('Deve deletar o redis key', async () => {
+      const redisDelSpy = jest.spyOn(redis, 'del').mockResolvedValue(1);
+      await service.execute(createHotelMock, userIdMock);
+      expect(redisDelSpy).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+    });
 
-  it('Deve criar um hotel', async () => {
-    const result = await service.execute(createHotelMock, userIdMock);
-    await service.execute(createHotelMock, userIdMock);
-    expect(hotelRepositories.createHotel).toHaveBeenCalledWith(
-      createHotelMock,
-      userIdMock,
-    );
-    expect(result).toEqual(createHotelMock);
+    it('Deve criar um hotel', async () => {
+      const result = await service.execute(createHotelMock, userIdMock);
+      await service.execute(createHotelMock, userIdMock);
+      expect(hotelRepositories.createHotel).toHaveBeenCalledWith(
+        createHotelMock,
+        userIdMock,
+      );
+      expect(result).toEqual(createHotelMock);
+    });
   });
 });

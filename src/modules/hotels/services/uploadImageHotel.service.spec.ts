@@ -59,49 +59,51 @@ describe('UploadImageHotelService', () => {
     expect(service).toBeDefined();
   });
 
-  it('Deve lançar o erro NotFoundException se o hotel não for encontrado', async () => {
-    (hotelRepository.findHotelById as jest.Mock).mockResolvedValue(null);
-    const result = service.execute('1', 'new-image.png');
-    await expect(result).rejects.toThrow(NotFoundException);
-  });
-
-  it('Deve deletar a imagem antiga se existir', async () => {
-    (stat as jest.Mock).mockResolvedValue(true);
-    await service.execute('1', 'new-image.png');
-
-    const directory = resolve(
-      __dirname,
-      '..',
-      '..',
-      '..',
-      '..',
-      'uploads-hotel',
-    );
-    const hotelImageFilePath = resolve(directory, hotelMock.image);
-
-    expect(stat).toHaveBeenCalledWith(hotelImageFilePath);
-    expect(unlink).toHaveBeenCalledWith(hotelImageFilePath);
-  });
-
-  it('Não deve retornar um erro se a imagem antiga não existir', async () => {
-    (stat as jest.Mock).mockResolvedValue(null);
-
-    await expect(service.execute('1', 'new-image.png')).resolves.not.toThrow();
-  });
-
-  it('Deve atualizar a imagem o hotel com uma nova imagem', async () => {
-    (hotelRepository.findHotelById as jest.Mock).mockResolvedValue(hotelMock);
-    (stat as jest.Mock).mockResolvedValue(true);
-
-    await service.execute('1', 'new-image.png');
-
-    expect(hotelRepository.updateHotel).toHaveBeenCalledWith(1, {
-      image: 'new-image.png',
+  describe('execute', () => {
+    it('Deve lançar o erro NotFoundException se o hotel não for encontrado', async () => {
+      (hotelRepository.findHotelById as jest.Mock).mockResolvedValue(null);
+      const result = service.execute('1', 'new-image.png');
+      await expect(result).rejects.toThrow(NotFoundException);
     });
-  });
 
-  it('Deve deletar a chave do Redis associada ao hotel', async () => {
-    await service.execute('1', 'new-image.png');
-    expect(redis.del).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+    it('Deve deletar a imagem antiga se existir', async () => {
+      (stat as jest.Mock).mockResolvedValue(true);
+      await service.execute('1', 'new-image.png');
+
+      const directory = resolve(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        '..',
+        'uploads-hotel',
+      );
+      const hotelImageFilePath = resolve(directory, hotelMock.image);
+
+      expect(stat).toHaveBeenCalledWith(hotelImageFilePath);
+      expect(unlink).toHaveBeenCalledWith(hotelImageFilePath);
+    });
+
+    it('Não deve retornar um erro se a imagem antiga não existir', async () => {
+      (stat as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.execute('1', 'new-image.png')).resolves.not.toThrow();
+    });
+
+    it('Deve atualizar a imagem o hotel com uma nova imagem', async () => {
+      (hotelRepository.findHotelById as jest.Mock).mockResolvedValue(hotelMock);
+      (stat as jest.Mock).mockResolvedValue(true);
+
+      await service.execute('1', 'new-image.png');
+
+      expect(hotelRepository.updateHotel).toHaveBeenCalledWith(1, {
+        image: 'new-image.png',
+      });
+    });
+
+    it('Deve deletar a chave do Redis associada ao hotel', async () => {
+      await service.execute('1', 'new-image.png');
+      expect(redis.del).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+    });
   });
 });
