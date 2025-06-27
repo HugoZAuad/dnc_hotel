@@ -4,7 +4,12 @@ import { RESERVATION_REPOSITORIES_TOKEN } from '../utils/repositoriesReservation
 import { ReservationRepositories } from '../infra/reservations.repositories'
 import { differenceInDays, parseISO } from 'date-fns'
 import { HotelRepositories } from 'src/modules/hotels/infra/hotels.repository'
-import { ReservationStatus } from 'generated/prisma/client'
+
+export enum ReservationStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED',
+}
 import { HOTEL_REPOSITORIES_TOKEN } from 'src/modules/hotels/utils/repositoriesHotel.Tokens'
 import { MailerService } from '@nestjs-modules/mailer'
 import { FindUserByIdService } from 'src/modules/users/services/findUserById.service'
