@@ -21,7 +21,7 @@ export class UploadAvatarUserService {
     const directory = resolve(__dirname, '..', '..', '..', 'uploads')
     if (user.avatar) {
       const userAvatarFilePath = join(directory, user.avatar)
-      const userAvatarFileExists = stat(userAvatarFilePath)
+      const userAvatarFileExists = await stat(userAvatarFilePath).catch(() => null)
       if (userAvatarFileExists) {
         await unlink(userAvatarFilePath)
       }

@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { IUserRepositories } from '../domain/repositories/IUser.repositories'
 import { USER_REPOSITORIES_TOKEN } from '../utils/repositoriesUser.Tokens'
-import { User } from 'generated/prisma/client'
+import { User } from '../../../../generated/prisma/client'
 
 @Injectable()
 export class FindUserByEmailService {
