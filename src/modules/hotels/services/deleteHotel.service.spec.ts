@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeleteHotelsService } from './deleteHotel.Service';
-import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 
 describe('DeleteHotelsService', () => {
   let service: DeleteHotelsService;
