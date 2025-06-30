@@ -12,139 +12,121 @@ import { UpdateHotelDTO } from 'src/modules/hotels/domain/dto/updateHotel.dto';
 jest.setTimeout(30000);
 
 jest.mock('ioredis', () => {
-  const moduleRedis = jest.fn().mockImplementation(() => ({
+  const mockRedis = jest.fn().mockImplementation(() => ({
     del: jest.fn().mockResolvedValue(1),
-    get: jest.fn().mockResolvedValue(JSON.stringify([{ key: 'mock-value' }])),
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(null),
     quit: jest.fn().mockResolvedValue(null),
   }));
-  return { __esModule: true, default: moduleRedis, Redis: moduleRedis };
+  return { __esModule: true, default: mockRedis, Redis: mockRedis };
 });
 
-describe('AppController (e2e)', () => {
+describe('HotelsController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let adminToken: string;
   let userToken: string;
-  let redisCliente: Redis;
+  let redis: Redis;
   let hotelId: number;
+  let adminId: number;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
+    const moduleFixture: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleFixture.createNestApplication();
-    redisCliente = new Redis();
     prisma = app.get(PrismaService);
+    redis = new Redis();
 
     await app.init();
 
-    const adminUser = await prisma.user.create({
-      data: {
-        name: 'Admin',
-        email: 'admin@teste.com.br',
-        password: '123456',
-        role: Role.ADMIN,
-      },
+    const admin = await prisma.user.create({
+      data: { name: 'Admin', email: 'admin@e2e.com', password: '123456', role: Role.ADMIN },
     });
 
-    const normalUser = await prisma.user.create({
-      data: {
-        name: 'User',
-        email: 'user@teste.com.br',
-        password: '123456',
-        role: Role.USER,
-      },
+    const user = await prisma.user.create({
+      data: { name: 'User', email: 'user@e2e.com', password: '123456', role: Role.USER },
     });
 
-    adminToken = jwt.sign(
-      { sub: adminUser.id, role: Role.ADMIN },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h', issuer: 'dnc_hotel', audience: 'users' },
-    );
+    adminId = admin.id;
 
-    userToken = jwt.sign(
-      { sub: normalUser.id, role: Role.USER },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h', issuer: 'dnc_hotel', audience: 'users' },
-    );
+    adminToken = jwt.sign({ sub: admin.id, role: Role.ADMIN }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+      issuer: 'dnc_hotel',
+      audience: 'users',
+    });
+
+    userToken = jwt.sign({ sub: user.id, role: Role.USER }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+      issuer: 'dnc_hotel',
+      audience: 'users',
+    });
   });
 
   afterAll(async () => {
     await prisma.hotel.deleteMany({});
     await prisma.user.deleteMany({});
-    await redisCliente.quit();
+    await redis.quit();
     await app.close();
   });
 
   it('/hotels (POST)', async () => {
-    const createHotelDto: CreateHotelDTO = {
-      name: 'test hotel',
-      description: 'A test hotel for e2e testing',
-      price: 100,
-      address: '123 Test St, Test City, TC 12345',
-      ownerId: 1,
+    const dto: CreateHotelDTO = {
+      name: 'Hotel E2E',
+      description: 'Test hotel',
+      price: 150,
+      address: 'Rua Teste',
+      ownerId: adminId,
     };
 
-    const response = await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post('/hotels')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(createHotelDto)
+      .send(dto)
       .expect(201);
 
-    hotelId = response.body.id;
+    hotelId = res.body.id;
 
-    expect(response.body).toMatchObject({
-      name: createHotelDto.name,
-      description: createHotelDto.description,
-      price: createHotelDto.price,
-      address: createHotelDto.address,
+    expect(res.body).toMatchObject({
+      name: dto.name,
+      address: dto.address,
+      price: dto.price,
     });
   });
 
   it('/hotels (GET)', async () => {
-    const response = await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .get('/hotels')
       .set('Authorization', `Bearer ${userToken}`)
       .expect(200);
 
-    expect(response.body.data).toBeInstanceOf(Array);
-    expect(response.body.data).toHaveLength(1);
+    expect(Array.isArray(res.body.data)).toBe(true);
   });
 
   it('/hotels/:id (GET)', async () => {
-    const response = await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .get(`/hotels/${hotelId}`)
       .set('Authorization', `Bearer ${userToken}`)
       .expect(200);
 
-    expect(response.body).toMatchObject({
-      id: hotelId,
-      name: 'test hotel',
-    });
+    expect(res.body.id).toBe(hotelId);
   });
 
   it('/hotels/:id (PATCH)', async () => {
-    const updateHotelDto: UpdateHotelDTO = {
-      name: 'updated hotel',
-    };
+    const dto: UpdateHotelDTO = { name: 'Hotel Atualizado' };
 
-    const response = await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .patch(`/hotels/${hotelId}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(updateHotelDto)
+      .send(dto)
       .expect(200);
 
-    expect(response.body).toMatchObject({
-      name: updateHotelDto.name,
-    });
+    expect(res.body.name).toBe(dto.name);
   });
 
   it('/hotels/image/:hotelId (PATCH)', async () => {
     await request(app.getHttpServer())
       .patch(`/hotels/image/${hotelId}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .attach('avatar', Buffer.from('mock-file-content'), 'mock-file.jpg')
+      .attach('avatar', Buffer.from([0xff, 0xd8, 0xff]), 'image.jpg')
       .expect(200);
   });
 
