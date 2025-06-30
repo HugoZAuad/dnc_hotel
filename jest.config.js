@@ -13,8 +13,8 @@ module.exports = {
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/$1',
     '^generated/prisma/client$':
-      '<rootDir>/../generated/prisma/client/index.js',
-    '^generated/prisma(.*)$': '<rootDir>/../generated/prisma/client$1',
+      '<rootDir>/../generated/prisma/client.js',
+    '^generated/prisma(.*)$': '<rootDir>/../generated/prisma$1',
     '^src/modules/prisma/(.*)$': '<rootDir>/modules/prisma/$1',
   },
   clearMocks: true,
